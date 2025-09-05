@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Chat System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-top: 30px;
+        }
+        
+        .logo-area {
+            margin-bottom: 30px;
+        }
+        
+        .company-name {
+            font-size: 2.8em;
+            font-weight: 700;
+            color: #DC143C;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+        
+        .system-title {
+            font-size: 1.8em;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .subtitle {
+            font-size: 1.1em;
+            color: #666;
+            font-weight: 300;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(220, 20, 60, 0.1);
+            border: 1px solid #f0f0f0;
+            padding: 40px;
+        }
+        
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            background: #ffffff;
+            color: #DC143C;
+            padding: 20px 24px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 2px solid #DC143C;
+            box-shadow: 0 2px 8px rgba(220, 20, 60, 0.1);
+        }
+        
+        .nav-item:hover {
+            background: #DC143C;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(220, 20, 60, 0.25);
+        }
+        
+        .nav-item:active {
+            transform: translateY(0);
+        }
+        
+        .icon {
+            font-size: 1.4em;
+            margin-right: 12px;
+            min-width: 24px;
+        }
+        
+        .nav-text {
+            flex: 1;
+        }
+        
+        .arrow {
+            font-size: 1.2em;
+            opacity: 0.7;
+            transition: transform 0.2s ease;
+        }
+        
+        .nav-item:hover .arrow {
+            transform: translateX(4px);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #999;
+            font-size: 0.9em;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .company-name {
+                font-size: 2.2em;
+            }
+            
+            .system-title {
+                font-size: 1.5em;
+            }
+            
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .nav-item {
+                padding: 18px 20px;
+                font-size: 1em;
+            }
+        }
+        
+        .version-badge {
+            display: inline-block;
+            background: #DC143C;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-area">
+            <h1 class="company-name">Research Chat System</h1>
+        </div>
+        <h2 class="system-title">Review Dashboard</h2>
+        <!-- <p class="subtitle">Business Review Dashboard</p> -->
+    </div>
+    
+    <div class="container">
+        <nav class="nav-grid">
+            <a href="https://dok9gold.github.io/b/1.login.html" class="nav-item">
+                <span class="icon">🔐</span>
+                <span class="nav-text">로그인</span>
+                <span class="arrow">→</span>
+            </a>
+            
+            <a href="https://dok9gold.github.io/b/2.password.html" class="nav-item">
+                <span class="icon">🔑</span>
+                <span class="nav-text">비밀번호 변경</span>
+                <span class="arrow">→</span>
+            </a>
+            
+            <a href="https://dok9gold.github.io/b/3.chat.html" class="nav-item">
+                <span class="icon">💬</span>
+                <span class="nav-text">채팅</span>
+                <span class="arrow">→</span>
+            </a>
+            
+            <a href="https://dok9gold.github.io/b/4.report_otherCorp.html" class="nav-item">
+                <span class="icon">📊</span>
+                <span class="nav-text">리포트 (타사제품)</span>
+                <span class="arrow">→</span>
+            </a>
+            
+            <a href="https://dok9gold.github.io/b/5.report_diseasePrevalence.html" class="nav-item">
+                <span class="icon">📈</span>
+                <span class="nav-text">리포트 (유병율)</span>
+                <span class="arrow">→</span>
+            </a>
+            
+            <a href="https://dok9gold.github.io/b/6.report_target_gene.html" class="nav-item">
+                <span class="icon">🧬</span>
+                <span class="nav-text">리포트 (타겟진)</span>
+                <span class="arrow">→</span>
+            </a>
+        </nav>
+        
+        <div class="footer">
+            검토 및 피드백용 프로토타입
+        </div>
+    </div>
+</body>
+</html>
