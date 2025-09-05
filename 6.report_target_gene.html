@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상세 보고서</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <style>
+        /* CSS Variables - Using updated_chat_layout888 style */
+        :root {
+            --color-white: #FFFFFF;
+            --color-black: #000000;
+            --color-red: #DC2626;
+            --color-gray-50: #F9FAFB;
+            --color-gray-100: #F3F4F6;
+            --color-gray-200: #E5E7EB;
+            --color-gray-300: #D1D5DB;
+            --color-gray-400: #9CA3AF;
+            --color-gray-500: #6B7280;
+            --color-gray-600: #4B5563;
+            --color-gray-700: #374151;
+            --color-gray-800: #1F2937;
+            --color-gray-900: #111827;
+            --color-red-light: #FEF2F2;
+            --color-red-dark: #991B1B;
+        }
+
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--color-gray-50);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* GeneSeq Vista Header - 기존 스타일 유지하되 현대적으로 개선 */
+        .geneseq-header {
+            background: var(--color-white);
+            border-bottom: 1px solid var(--color-gray-200);
+            /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
+        }
+
+        .geneseq-container {
+            background-color: white;
+            border: 2px solid var(--color-gray-200);
+        }
+
+        .header {
+            background-color: #d32f2f;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            background-color: var(--color-gray-100);
+            padding: 10px 20px;
+            font-size: 13px;
+            color: var(--color-gray-600);
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+
+        .content {
+            display: flex;
+        }
+
+        .left-panel {
+            border-right: 1px solid var(--color-gray-200);
+            min-width: 400px;
+        }
+
+        .form-row {
+            display: flex;
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+
+        .form-label {
+            background-color: var(--color-gray-50);
+            padding: 12px 20px;
+            font-weight: 600;
+            width: 150px;
+            border-right: 1px solid var(--color-gray-200);
+            font-size: 14px;
+            color: var(--color-gray-700);
+        }
+
+        .form-input {
+            padding: 12px 20px;
+            flex: 1;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+
+        .pathogen-dropdown {
+            width: 200px;
+            padding: 8px 12px;
+            /* border: 1px solid var(--color-gray-300); */
+            border-radius: 6px;
+            font-size: 14px;
+            color: #d32f2f;
+            background: white;
+            cursor: pointer;
+        }
+
+        .pathogen-dropdown:focus {
+            outline: none;
+            border-color: #d32f2f;
+            /* box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1); */
+        }
+
+        .pathogen-dropdown option {
+            color: black;
+        }
+
+        .red-text {
+            color: #d32f2f;
+            font-weight: 500;
+        }
+
+        .right-panel {
+            padding: 20px;
+            background-color: var(--color-gray-50);
+            width: 300px;
+        }
+
+        .info-item {
+            font-size: 13px;
+            margin: 8px 0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--color-gray-700);
+            min-width: 100px;
+        }
+
+        /* Main Content Area - Full page scroll */
+        .main-container {
+            width: 100%;
+        }
+
+        /* Markdown Container - Modern styling */
+        .markdown-container {
+            background: var(--color-white);
+            margin: 20px;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--color-gray-200);
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Markdown Content Styling - updated_chat_layout888 스타일 */
+        #content {
+            max-width: 100%;
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--color-gray-800);
+        }
+
+        /* Headers */
+        h1 {
+            color: var(--color-gray-900);
+            border-bottom: 3px solid #d32f2f;
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        h2 {
+            color: var(--color-gray-800);
+            border-bottom: 2px solid var(--color-gray-200);
+            padding-bottom: 8px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.375rem;
+            font-weight: 600;
+        }
+
+        h3 {
+            color: var(--color-gray-700);
+            margin-top: 30px;
+            margin-bottom: 16px;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        /* Tables - Modern styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            font-size: 14px;
+            background: var(--color-white);
+            border-radius: 8px;
+            overflow: hidden;
+            /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
+        }
+
+        th, td {
+            border: 1px solid var(--color-gray-200);
+            padding: 14px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--color-gray-50);
+            font-weight: 600;
+            color: var(--color-gray-800);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--color-gray-50);
+        }
+
+        tr:hover {
+            background-color: var(--color-red-light);
+        }
+
+        /* Code and inline elements */
+        code {
+            background: var(--color-gray-100);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', 'SF Mono', monospace;
+            font-size: 0.875em;
+            color: var(--color-gray-800);
+        }
+
+        /* Blockquotes */
+        blockquote {
+            border-left: 4px solid #d32f2f;
+            margin: 24px 0;
+            padding: 16px 24px;
+            background: var(--color-red-light);
+            font-style: italic;
+            border-radius: 0 6px 6px 0;
+        }
+
+        /* Strong text */
+        strong {
+            color: var(--color-gray-900);
+            font-weight: 600;
+        }
+
+        /* Links */
+        a {
+            color: #d32f2f;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--color-red-dark);
+            text-decoration: underline;
+        }
+
+        /* Horizontal rule */
+        hr {
+            border: none;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #d32f2f, transparent);
+            margin: 40px 0;
+        }
+
+        /* Table wrapper for responsive */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 24px 0;
+            border-radius: 8px;
+            /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+
+        li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        /* Paragraphs */
+        p {
+            margin: 16px 0;
+            line-height: 1.7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .right-panel {
+                width: 100%;
+            }
+            
+            .left-panel {
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .markdown-container {
+                margin: 10px;
+                padding: 20px;
+                border-radius: 8px;
+            }
+            
+            .content {
+                flex-direction: column;
+            }
+            
+            .right-panel {
+                width: 100%;
+                padding: 15px;
+            }
+            
+            .left-panel {
+                min-width: auto;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .form-label {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--color-gray-200);
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.25rem;
+            }
+            
+            h3 {
+                font-size: 1.125rem;
+            }
+        }
+
+        /* Loading state */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--color-gray-500);
+        }
+
+        .loading::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--color-gray-300);
+            border-top: 2px solid #d32f2f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- GeneSeq Vista Header Section -->
+    <div class="geneseq-header">
+        <div class="geneseq-container">
+            <div class="header">
+                GeneSeq Vista AI Agent
+            </div>
+            
+            <div class="subtitle">
+                PCR 검출용으로 AI기반 문헌탐색과 서열분석 결과로 최적의 target gene 후보를 추천해 드립니다.
+            </div>
+            
+            <div class="content">
+                <div class="left-panel">
+                    <div class="form-row">
+                        <div class="form-label">Pathogen name</div>
+                        <div class="form-input">
+                            <select class="pathogen-dropdown" id="pathogenSelect">
+                                <option value="monkeypox">Monkeypox virus</option>
+                                <option value="influenza">Influenza A virus</option>
+                                <option value="adenovirus">Adenovirus</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-label">Country</div>
+                        <div class="form-input red-text" id="countryDisplay">all</div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-label">Host</div>
+                        <div class="form-input red-text" id="hostDisplay">Human</div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-label">Related Disease</div>
+                        <div class="form-input red-text" id="diseaseDisplay">Monkeypox virus infection</div>
+                    </div>
+                </div>
+                
+                <div class="right-panel" id="infoPanel">
+                    <div class="info-item">
+                        <span class="info-label">Taxonomy name:</span>
+                        <span id="taxonomyName">Monkeypox</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Taxonomy ID:</span>
+                        <span id="taxonomyId">10244</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Rank:</span>
+                        <span id="rank">no rank</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Synonym:</span>
+                        <span id="synonym">MPXV, MPOX</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Total Sequence:</span>
+                        <span id="totalSequence">10,609</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container for Markdown Content -->
+    <div class="main-container">
+        <div class="markdown-container">
+            <div id="content"></div>
+        </div>
+    </div>
+
+    <script>
+        // 병원체별 데이터
+        const pathogenData = {
+            monkeypox: {
+                country: "all",
+                host: "Human",
+                disease: "Monkeypox virus infection",
+                taxonomyName: "Monkeypox",
+                taxonomyId: "10244",
+                rank: "no rank",
+                synonym: "MPXV, MPOX",
+                totalSequence: "10,609",
+                markdownContent: `
+# Monkeypox Virus Analysis
+
+## 전체 요약
+
+**Country** : all<br />
+**Host** : Human<br />\
+**Related Disease** : Monkeypox virus  infection
+
+|Rank|Gene or Region name|Protein name|Total score|Search score|Seqeunce score|Recommend|Note|
+|---|---|---|---|---|---|---|---|
+|1위|F3L|Double-stranded RNA binding protein|9.6|4.1|5.5|최우선||
+|2위|B6R|envelope protein|9.5|4.1|5.4|최우선||
+|3위|C19L|not provied|9.1|4.5|4.6|우선||
+|4위|J3L|Ankyrin-like protein|8.6|4.6|4|보조||
+|5위|J2L|Soluble TNF receptor CrmB|5.5|2.3|3.2|보조|(F3L + J2L 조합 가능)|
+
+
+**Excutive summary**
+>F3L, B6R은 Monkeypox infection 진단을 위한 최우선 Target gene 으로 CDC, WHO등 요기관에서 Gold standard 로 권고하는 유전자입니다. 
+해당 유전자는 다른 분자진단 회사(Roche,  ThermoFisher) 에서도 활용하고 있습니다.
+유전자 서열분석 시, variation이 적고 높은 보존성 (F3L = 99.7%, B6R = 98%)을 가지고 있어 높은 검출 감도로 검출할 수 있고, 다른 유사종과는 특이적으로 구별되는 부위를 가지고 있어 올리고 디자인이 가능성이 높습니다.
+
+## Detailed Results of the AI-based Literature Search 
+
+ **Background**
+- 원숭이 두창(Monkeypox virus infection)질병은 원숭이로 부터 사람에게 감염경로를 가지며 Monkeypox virus가 주요 원인균으로 현재 유럽 및 미국에서 가장 많이 확산되고 있고, 일부 아시아 국가에도 유입되고 있습니다. 
+- PCR 분자진단에서 많이 사용되는 표적은 F3L, B6R등이 사용되지만 스크리닝과 분류/동정(타이핑) 목적으로 C3L, vgf 유전자도 활용됩니다.
+
+
+### 1. F3L
+#### 1) 기본정보
+F3L 유전자는 Vaccinia virus의 E3L과 유사한 이중가닥 RNA 결합 기능을 가지는 단백질(Double-strand RNA binding protein)을 암호화하고 있습니다.
+
+| 항목                        | 내용                                                                   | 출처                                                                                                                               |
+| ------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Gene name                 | F3L                                                                  | [출처보기 (Ref.1)](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=10244&lvl=3&lin=f&keep=1&srchmode=1&unlock) |
+| Gene synonym              | OPG065                                                               | [출처보기 (Ref.1)](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=10244&lvl=3&lin=f&keep=1&srchmode=1&unlock) |
+| Protein name              | Double-stranded RNA binding protein                                  | [출처보기 (Ref.1)](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=10244&lvl=3&lin=f&keep=1&srchmode=1&unlock) |
+| # Seq of gene             | 약 28                                                                 | [출처보기 (Ref.1)](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=10244&lvl=3&lin=f&keep=1&srchmode=1&unlock) |
+| # Gene length (bp)-golden | 약 459                                                                | 출처보기 (Ref.2)                                                                                                                     |
+| # GC%                     | 33%                                                                  | 출처보기 (Ref.3)                                                                                                                     |
+| # Copy number             | Single Copy gene (1 copy per genome)                                 | 출처보기 (Ref.3)                                                                                                                     |
+| # 인용데이터 개수                | º 논문:  300건  <br>º 기관정보: 50건  <br>º 타사제품  : 30건  <br>º 기타 웹자료  : 10건 | 분석에 사용한 문헌 통계                                                                                                                    |
+
+#### 2) 세부정보
+
+| 항목                    | 내용                                                                                                                                           | 출처              |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| 특징 설명                 | 표준적으로 가장 많이 사용하는 진단용 marker  <br>종 구분력이 높아 진단 및 계통분류 모두에 활용                                                                                  | 출처보기 (Ref.1)    |
+| 장단점  <br>(민감도/특이도)    | 장점:  <br>• 높은 보존성(99.7%)  <br>• 풍부한 발현량  <br>• 검출 감도 우수  <br>• CDC 기준 권장 프라이머/프로브 세트 존재  <br>  <br>단점:  <br>• SARS-CoV-1과 교차반응 가능성 (95% 유사성) | 출처보기 (Ref.1) +3 |
+| 응용 (용도)               | Identification, Screening                                                                                                                    | 출처보기 (Ref.2)    |
+| Mutation/variation 존재 | SNP 다소 존재                                                                                                                                    | 출처보기 (Ref.4)    |
+| 근연종 구별 가능성            | 특별 언급 없음                                                                                                                                     |                 |
+| 기타                    | (PCR false negative signal 발생)                                                                                                               | 출처보기 (Ref.4)    |
+
+#### 3) 제품 및 기관정보
+##### 3.1) 자사 제품별 타겟 유전자 현황
+|회사명|제품명|승인 상태|Target gene|특징|출처|
+|---|---|---|---|---|---|
+|씨젠|Novaplex MPXV/OPXV plus Assay|RUO|F3L, B6R|Orthopox 동시 진단, multiplex, double target gene|출처보기 (Ref.4)|
+
+##### 3.2) 타사 제품별 타겟 유전자 현황
+|회사명|제품명|Target gene|승인 상태|특징|출처|
+|---|---|---|---|---|---|
+|DiaCarta|QuantiVirus™ MPXV Test Kit|J2L, B6R  <br>(+ Human RNase P internal control)|FDA EUA 승인|실시간 다중 PCR, 병변 스왑 시료에서 Clade I/II 검출|[출처보기 (Ref.5, 6)](https://www.fda.gov/media/164469/download?utm_source=chatgpt.com)|
+|RayBiotech|Monkeypox Virus (MPXV) PCR Nucleic Acid Detection Kit|J2R|RUO (연구용)|Fluorescent probe 기반 qPCR, 다양한 액체 시료에서 MPXV 검출|출처보기 (Ref.7)|
+|Bioperfectus|MPXV Fast Real-Time PCR Kit|(2개 target gene, 미공개)|RUO / CE-IVD 일부 지역|신속 PCR, outbreak control 용도 강조|[출처보기 (Ref.8)](https://www.rapidmicrobiology.com/news/welcome-new-bioperfectus-mpxv-detection-kits-for-better-outbreak-control?utm_source=chatgpt.com)|
+|Bioperfectus|MPXV / VZV / Variola Multiplex PCR Kit|MPXV: F3L, VZV: ORF38, Variola: B9R/B10R|RUO / CE-IVD 일부 지역|다중 감염 구분 가능 (Monkeypox, VZV, Variola 동시 검출)|[출처보기 (Ref.10)](https://www.rapidmicrobiology.com/news/welcome-new-bioperfectus-mpxv-detection-kits-for-better-outbreak-control?utm_source=chatgpt.com)|
+|IMDX|Mpox Detection RT-PCR Assay|Clade I & II 대상 (구체 유전자명 비공개)|승인 (일부 지역 규제 통과)|Clade I/II 변이 모두 검출 가능|[출처보기 (Ref.11)](https://pmc.ncbi.nlm.nih.gov/articles/PMC11650907/?utm_source=chatgpt.com)|
+
+##### 3.3) 주요기관 권고 현황
+|기관|문서명|Target gene|권고 Primer/probe 올리고 서열정보|권고 내용|날짜|
+|---|---|---|---|---|---|
+|WHO|Diagnostic testing and testing strategies for mpox: interim guidance|F3L|not provided|유전자 타겟 실패(gene target failure)를 피하고, MPXV 클레이드를 판별할 수 있는 진단 전략 권고. 보존된 Orthopoxvirus 또는 MPXV 유전자 타겟 사용 권장.|05.01.2024|
+|CDC (LOCS Lab Advisory)|LOCS 메시지: CDC Requests Continued Clade Testing of all Mpox Specimens|F3L+B3R|not provided|Clade I MPXV에 대한 조기 감별 검사 요구. 변이로 인해 클레이드 특이 PCR에 영향 가능성 있으므로, 필수 유전자(예: CDC의 non-variola Orthopoxvirus, NVO) 타겟 검사 권장.|05.22.2025|
+|CDC (Lab Alert)|Lab Alert: MPXV TNF Receptor Gene Deletion May Lead to False Negative Results|TNF receptor (J2R)|Forward Primer: 5’-GGA AAA TGT AAA GAC AAC GAA TAC AG-3'  <br>Reverse Primer: 5’-GCT ATC ACA TAA TCT GGA AGC GTA-3’  <br>Probe: 5’-FAM‑AAG CCG TAA TCT A(dT‑BHQ‑1)GT TGT CTA TCG TGT CC‑Spacer C6‑3’|TNF 수용체 유전자(TNF receptor, J2R) 결손으로 인해 MPXV-specific LDT에서 위음성(false negative) 가능성 있음. 멀티플렉스 또는 본질적 유전자, 혹은 NVO 타겟 assays 사용 권장.|09.22.2022|
+
+#### 4) 유전자 관계 그래프
+
+
+
+![Pasted image 20250825114455.png](./Pasted%20image%2020250825114455.png)
+
+참고: Interactive GraphRAG 시각화는 별도 HTML 파일로 제공
+
+
+##### 출처정보
+|Ref.ID|Tag|Title of Doc.|Title of Doc.|Publish Date|Country|
+|---|---|---|---|---|---|
+|Ref.1|Article|PubMed, PMC|The oooo|MM.DD. YYYY|US|
+|Ref.3|Organization|FDA, CDC, WHO etc.||||
+|Ref.3|Competitor|Roche, Qiagen etc.||||
+|Ref.4|Web|google||||
+
+
+
+## Detailed Results of the AI-based sequence analysis
+
+**Background**
+
+- 문헌에서 후보 유전자의 염기서열 분석을 통해  유사종(근연종) 과의 구별 가능성을 확인하여 프라이머/프로브 설계 가능성을 반영한 유전자를  선별하여 정보를 제공합니다.
+- Monkeypox virus (no rank)의 근연종은 MPXV의 상위인 Orthopoxvirus (genus)의 하위의 species /no rank 를 대상으로  대표서열로 부터 분석되었다 (NCBI database 기준).
+
+**Input pathogen**
+
+|No.|tax name (scientific name)|tax id|Rank|대표 Sequence accid|assembly accid|NCBI Database|Level|
+|---|---|---|---|---|---|---|---|
+|1|Monkeypox virus|10244|no rank|[NC_003310.1](https://www.ncbi.nlm.nih.gov/nuccore/NC_003310.1/)|GCF_000857045.1|RefSeq|Complete|
+
+**Relative pathogen**
+
+|No.|tax name (scientific name)|tax id|Rank|대표 Sequence accid|Assembly/genome|NCBI Database|Level|
+|---|---|---|---|---|---|---|---|
+|1|Orthopoxvirus abatinomacapox|2734574|species|NC_055231.1|GCF_006452235.1|RefSeq|Complete|
+|2|Orthopoxvirus akhmetapox|2200830|species|NC_055230.1|GCF_006452035.1|RefSeq|Complete|
+|3|Orthopoxvirus camelpox|3431480|species|NC_003391.1|GCF_000839105.1|RefSeq|Complete|
+|4|Orthopoxvirus cowpox|3431481|species|NC_003663.2|GCF_000839185.1|RefSeq|Complete|
+|5|Orthopoxvirus ectromlia|3431482|species|NC_004105.1|GCF_000841905.1|RefSeq|Complete|
+all exlclusivity는 NCBI BLAST 별도 시행
+
+### 1. F3L
+#### 1) Gene map
+
+##### URL : https://www.ncbi.nlm.nih.gov/gene/928998
+
+- Gene ID : 928998, updated on 18-Aug-2023
+- 유전자 position : 48048-48509, complement
+
+##### Graphics
+
+![Genomic context](https://www.ncbi.nlm.nih.gov/gutils/geneneighb.fcgi?geneid=928998&nuc_gi=17974913&n0=OPG062&n1=OPG063&n2=OPG064&n3=OPG065&n4=OPG066&n5=OPG068)
+
+[CBI Graphical Sequence Viewer : Monkeypox virus, complete genome](https://www.ncbi.nlm.nih.gov/nuccore/NC_003310.1?report=graph&from=47978&to=48577&strand=true)
+
+\'링크 클릭시 NCBI Graphical Sequence Viewer 화면으로 이동 \'
+
+
+#### 2) 근연종 구별 가능성 (Similarity)
+
+Monkeypox virus (NC_003310.1)의 F3L 유전자 서열과 근연종의 대표서열의 similarity를 분석했어요.
+
+91-95% 유사성을 가지며, 특히 Orthopoxvirus camelpox와는 95%로 매우 유사해요.  primer/probe 설계가 다양한 곳에서 디자인은 어렵겠지만 디자인이 가능성이 없지는 않아요.
+
+|No.|tax name (scientific name)|대표 Sequence accid|Similarity (%)|
+|---|---|---|---|
+|1|Orthopoxvirus abatinomacacapox|NC_055231.1|91%|
+|2|Orthopoxvirus akhmetapox|NC_055230.1|92%|
+|3|Orthopoxvirus camelpox|NC_003391.1|95%|
+|4|Orthopoxvirus cowplox|NC_003663.2|94%|
+|5|Orthopoxvirus ectromlia|NC_004105.1|93%|
+
+#### 3) 추가 유사 서열 분석 (Blast analysis, similarity 90% 이상)
+
+유의미한 유사종 추가 없음
+
+![Pasted image 20250825135941.png](./Pasted%20image%2020250825135941.png)
+
+[https://blast.ncbi.nlm.nih.gov/Blast.cgi](https://blast.ncbi.nlm.nih.gov/Blast.cgi)
+
+사용한 tool : NCBI Blast
+
+#### 4) 예상 올리고 디자인 가능 지역s
+
+![Pasted image 20250825140441.png](./Pasted%20image%2020250825140441.png)
+
+|디자인 예상 가능 지역|유전자 기준 position (1-459)|변이 발생률|
+|---|---|---|
+|1|10-200|1%|
+|2|250-357|3%|
+|3|400-440|0.10%|
+
+AI기반 모델 및 오픈되어 있는 바이오 유전자 관련 툴을 사용하여 분석한 결과, F3L 유전자의 해당 위치에서 프라이머/프로브 디자인 가능할 것으로 분석되었습니다.
+
+#### 5) Result summary
+
+|항목|내용|추가설명|출처|
+|---|---|---|---|
+|데이터 커버리지 현황|서열 data 충분|- NCBI (Core_nt): 1.5M+  <br>- GISAID : 1K+|Link|
+|유전자 변이 빈도수|낮음 (1-3%)|F3L은 변이 또는 variation 발생이 적어요.||
+|근연종 구별 가능성|가능|Orthopoxvirus calmel 은 MPXV와 95%로 매우유사하여 교차반응 위험이 있습니다.||
+|프라이머 설계 복잡성|중상|||
+
+#### 6) File download
+
+[Alignment file]()
+
+[Fasta file]()                                                                                                                 |
+`
+            },
+            influenza: {
+                country: "-",
+                host: "-",
+                disease: "Influenza",
+                taxonomyName: "Influenza A virus",
+                taxonomyId: "-",
+                rank: "no rank",
+                synonym: "-",
+                totalSequence: "-",
+                markdownContent: `
+# Influenza A virus Gene marker candidates analysis Results
+
+## 조사 개요
+
+Influenza A virus를 Real-time PCR 기반으로 진단하기 위해 적합한 타겟 유전자를 AI 분석을 통해 선별하여 추천드립니다.
+
+요약결과에 제시된 후보 유전자5 종은 기존 연구 문헌, 등록 서열 데이터, 임상적 성능 지표를 종합적으로 검토하여 선정되었습니다.
+
+제공되는 요약 표에는 다음의 내용을 포함합니다. 
+
+- 유전자 특징: 진단 타겟으로서의 구조적·기능적 특성을 확인할 수 있는 정보,
+- 임상적 성능 정보(민감도·특이도): 실제 진단 시 안정성과 신뢰성을 평가할 수 있는 핵심 근거,
+- Score 기반 순위화: 다수의 지표를 반영한 AI 종합 점수로, 가장 유망한 후보를 직관적으로 확인 가능,
+- 종합 평가 의견: 각 후보 유전자의 강점과 한계를 간략히 정리한 코멘트
+
+이 표를 통해 연구자는 빠르게 우선순위를 파악하고, 이후 상세 결과를 참고하여 프라이머/프로브 개발에 활용하실 수 있습니다.
+
+## 조사 결과
+### 1. Executive Summary
+M gene이 보존성이 높아 주력타겟으로 추천합니다.
+블라블라...
+
+|Rank|Gene name|Gene characteristics|Diagnostic performance|Evidenc count  <br>(기관/타사)|NCBI 서열수  <br>(Ref. seq.)|Score|종합평가|
+|---|---|---|---|---|---|---|---|
+|1|Matrix gene|highly conserved|민감도/특이도 모두 높음|120/11|3500  <br>(NC_002017)|0.92|주력타겟 추천|
+|2|haemagglutinin gene|Subtype-specific marker|민감도 높음, 특이도 >99%|100/10|2800  <br>(NC_002017)|0.88|아형분석 병행 용도|
+|3|nonstructural protein NS-1 gene|Multi-copy gene|민감도/특이도 모두 높음|82/10|3000  <br>(NC_002017)|0.84|신속검사에 유용|
+|4|…|…|…|…|…|…|…|
+|5|…|…|…|…|…|…|…|
+
+### 2. Detailed Results
+
+본 섹션에서는 수집된 문헌·데이터를 기반으로 각 후보 유전자에 대한 상세 정보를 제공합니다.
+
+이 결과를 통해 사용자는
+- 임상적 성능 지표(민감도, 특이도 등)를 확인하여 실제 진단 적용 가능성을 판단할 수 있고,
+- 유전자의 기능적, 구조적 특징을 이해함으로써 변이 안정성 및 보존성을 고려한 타겟 적합성을 검토할 수 있으며,
+- NCBI 등록 서열 정보와 기존 제품·연구 사례를 참고하여 프라이머/프로브 설계 및 벤치마킹 전략을 수립할 수 있습니다.
+
+#### 1. Matrix gene
+
+| 구분         | 항목                                 | 요약 내용                                                                                                                                              | Reference |
+| ---------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| 1. Gene 특성 | Gene synonyms                      | Matrix protein gene, M gene                                                                                                                        | 1         |
+|            | Multicopy gene                     | multi-copy gene                                                                                                                                    | 2, 3, 4   |
+|            | Conservation                       | highly conserved                                                                                                                                   | 5, 6      |
+|            | Mutation info                      | 변이 발생 가능성 거의 없음                                                                                                                                    | 2, 5, 6   |
+|            | NCBI 서열정보                          | Reference sequence ACCESSION No. : ~~~  <br>Gene 서열 등록 수 : 1,234                                                                                   | 7         |
+| 2. 성능 지표   | Sensitivity                        | 95~99%                                                                                                                                             | 8, 9, 10  |
+|            | Specificity                        | 92~98%                                                                                                                                             | 8, 9, 10  |
+|            | Analytical Sensitivity             | 5~50 copies/reaction                                                                                                                               | 11, 12    |
+|            | Analytical Specificity             | No cross-reactivity with other respiratory pathogens                                                                                               | 11, 12    |
+| 3. 검출 방법   | Detection method                   | qPCR, multiplex PCR, real-time PCR                                                                                                                 | 2, 3, 4   |
+|            | Representative  <br>Oligo sequence | Forward: 5'-CGTACGGTCGGCGAGCT-3’  <br>Reverse: 5'-TGACCCACCCGACGTTG-3’  <br>Probe: 5’-FAM-ATGCGGTTAACCACTA-BHQ-3’                                  | 8         |
+| 4. 제품 및 근거 | Commercial Product                 | DiaPlexQ ™ Influenza Virus A/B Detection kit (Solgent)                                                                                             | 13        |
+|            | Evidence sentence                  | The matrix protein gene (M gene) of Influenza A viruses shows high conservation and stability and is used as the target gene for real-time RT-PCR. | 10        |
+|            | Reference count                    | Scientific literature: OO건  <br>보건기관: OO건  <br>타사제품: OO건  <br>Web 결과: OO 건                                                                         | 총 OO건     |
+#### 2. haemagglutinin gene
+| 구분         | 항목                                 | 요약 내용                                                                                                                                              | Reference |
+| ---------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| 1. Gene 특성 | Gene synonyms                      | Matrix protein gene, M gene                                                                                                                        | 14        |
+|            | Multicopy gene                     | multi-copy gene                                                                                                                                    | 15        |
+|            | Conservation                       | highly conserved                                                                                                                                   | 16        |
+|            | Mutation info                      | Strain 마다 구분되는 서열 보유                                                                                                                               | 17        |
+|            | NCBI 서열정보                          | Reference sequence ACCESSION No. : ~~~  <br>Gene 서열 등록 수 : 1,234                                                                                   | 18        |
+| 2. 성능 지표   | Sensitivity                        | 95~99%                                                                                                                                             | 19        |
+|            | Specificity                        | 92~98%                                                                                                                                             | 20        |
+|            | Analytical Sensitivity             | 5~50 copies/reaction                                                                                                                               | 21        |
+|            | Analytical Specificity             | No cross-reactivity with other respiratory pathogens                                                                                               | 22        |
+| 3. 검출 방법   | Detection method                   | qPCR, multiplex PCR, real-time PCR                                                                                                                 | 23        |
+|            | Representative  <br>Oligo sequence | Forward: 5'-CGTACGGTCGGCGAGCT-3’  <br>Reverse: 5'-TGACCCACCCGACGTTG-3’  <br>Probe: 5’-FAM-ATGCGGTTAACCACTA-BHQ-3’                                  | 24        |
+| 4. 제품 및 근거 | Commercial Product                 | DiaPlexQ ™ Influenza Virus A/B Detection kit (Solgent)                                                                                             | 25        |
+|            | Evidence sentence                  | The matrix protein gene (M gene) of Influenza A viruses shows high conservation and stability and is used as the target gene for real-time RT-PCR. | 26        |
+|            | Reference count                    | Scientific literature: OO건  <br>보건기관: OO건  <br>타사제품: OO건  <br>Web 결과: OO 건                                                                         | 총 OO건     |
+
+### 3. Discussion
+
+본 보고서에 제시된 타겟 유전자 정보는 최신 문헌 분석 결과를 기반으로 도출된 후보군이며, 진단 시약 개발 과정에서 타겟 선정 및 실험 설계의 참고 자료로 활용될 수 있습니다. 
+
+실제 적용을 위해서는 추가적인 실험 검증이 필요합니다.
+
+## 출처 정보
+
+Influenza A virus의 후보 유전자 조사를 위해 총 OO건의 자료를 참고하였으며, 정보의 최신성을 확보하기 위해 최근 20년 이내에 발표된 논문과 보건기관의 최신 정보를 기반으로 분석을 수행하였습니다.
+
+| Ref. ID | Type               | Ref. name            | Title | publish date | URL                                                 |
+| ------- | ------------------ | -------------------- | ----- | ------------ | --------------------------------------------------- |
+| 1       | Scientific Article | 저널명                  | 논문 제목 | 2025-08-26   | [https://www.example.com](https://www.example.com/) |
+| 2       | Health authority   | WHO, CDC, FDA, …     | 자료 제목 | 2025-08-26   | [https://www.example.com](https://www.example.com/) |
+| 3       | Database           | NCBI Gene            | -     | 2025-08-26   | [https://www.example.com](https://www.example.com/) |
+| 4       | Web                | google, competitor,… | 자료 제목 | 2025-08-26   | [https://www.example.com](https://www.example.com/) |
+| 5       | …                  | …                    | …     | …            | …                                                   |
+| 6       | …                  | …                    | …     | …            | …                                                   |
+| 7       | …                  | …                    | …     | …            | …                                                   |
+`
+            },
+            adenovirus: {
+                country: "-",
+                host: "-",
+                disease: "Adenovirus infection",
+                taxonomyName: "Adenovirus",
+                taxonomyId: "10508",
+                rank: "genus",
+                synonym: "AdV",
+                totalSequence: "8,932",
+                markdownContent: `
+# Adenovirus Analysis
+
+## 전체 요약
+
+**Country** : all<br />
+**Host** : Human<br />
+**Related Disease** : Adenovirus infection
+
+## Detailed Results of the AI-based Literature Search 
+
+### Background
+아데노바이러스는 급성 호흡기 감염, 결막염, 위장관염 등을 유발하는 DNA 바이러스로, 특히 면역력이 약한 환자에서 심각한 감염을 일으킬 수 있습니다.
+
+## Detailed Results of the AI-based sequence analysis
+
+### 주요 타겟 유전자 후보들
+- **Hexon gene**: 가장 보편적으로 사용되는 진단 타겟
+- **Fiber gene**: 타입별 구분에 유용한 마커
+- **E1A gene**: 초기 단백질 유전자로 높은 특이성
+
+### 권장사항
+Hexon gene을 1차 스크리닝 타겟으로, Fiber gene을 타이핑 목적으로 사용하는 것을 권장합니다.
+`
+            }
+        };
+
+        // 페이지 로드 시 초기화
+        window.onload = function() {
+            // 병원체 선택 이벤트 리스너
+            document.getElementById('pathogenSelect').addEventListener('change', function(e) {
+                const selectedPathogen = e.target.value;
+                updatePathogenInfo(selectedPathogen);
+            });
+            
+            // 초기 병원체 데이터 로드
+            updatePathogenInfo('monkeypox');
+        };
+
+        // 병원체 정보 업데이트 함수
+        function updatePathogenInfo(pathogen) {
+            const data = pathogenData[pathogen];
+            if (data) {
+                // 좌측 패널 업데이트
+                document.getElementById('countryDisplay').textContent = data.country;
+                document.getElementById('hostDisplay').textContent = data.host;
+                document.getElementById('diseaseDisplay').textContent = data.disease;
+                
+                // 우측 패널 업데이트
+                document.getElementById('taxonomyName').textContent = data.taxonomyName;
+                document.getElementById('taxonomyId').textContent = data.taxonomyId;
+                document.getElementById('rank').textContent = data.rank;
+                document.getElementById('synonym').textContent = data.synonym;
+                document.getElementById('totalSequence').textContent = data.totalSequence;
+                
+                // 마크다운 내용 업데이트
+                renderMarkdown(data.markdownContent);
+            }
+        }
+
+        // 마크다운 렌더링 함수
+        function renderMarkdown(markdown) {
+            const html = marked.parse(markdown);
+            document.getElementById('content').innerHTML = html;
+            
+            // 테이블을 래퍼로 감싸기 (반응형 스크롤)
+            const tables = document.querySelectorAll('table');
+            tables.forEach(table => {
+                if (!table.parentElement.classList.contains('table-wrapper')) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'table-wrapper';
+                    table.parentNode.insertBefore(wrapper, table);
+                    wrapper.appendChild(table);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
