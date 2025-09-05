@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상세 보고서</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* CSS Variables - Using updated_chat_layout888 style */
+        :root {
+            --color-white: #FFFFFF;
+            --color-black: #000000;
+            --color-red: #DC2626;
+            --color-gray-50: #F9FAFB;
+            --color-gray-100: #F3F4F6;
+            --color-gray-200: #E5E7EB;
+            --color-gray-300: #D1D5DB;
+            --color-gray-400: #9CA3AF;
+            --color-gray-500: #6B7280;
+            --color-gray-600: #4B5563;
+            --color-gray-700: #374151;
+            --color-gray-800: #1F2937;
+            --color-gray-900: #111827;
+            --color-red-light: #FEF2F2;
+            --color-red-dark: #991B1B;
+        }
+
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--color-gray-50);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* GeneSeq Vista Header */
+        .geneseq-header {
+            background: var(--color-white);
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+
+        .geneseq-container {
+            background-color: white;
+            border: 2px solid var(--color-gray-200);
+        }
+
+        .header {
+            background-color: #d32f2f;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            background-color: var(--color-gray-100);
+            padding: 10px 20px;
+            font-size: 13px;
+            color: var(--color-gray-600);
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+        .red-text {
+            color: #d32f2f;
+            font-weight: 500;
+        }
+
+        /* Download Section */
+        .download-section {
+            margin: 20px 20px 0;
+            text-align: center;
+            background: var(--color-white);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--color-gray-200);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .download-info {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #1976d2;
+        }
+
+        .word-download-btn {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 10px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(211, 47, 47, 0.2);
+        }
+
+        .word-download-btn:hover {
+            background: var(--color-red-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(211, 47, 47, 0.3);
+        }
+
+        /* Main Content Area */
+        .main-container {
+            width: 100%;
+        }
+
+        /* Markdown Container */
+        .markdown-container {
+            background: var(--color-white);
+            margin: 20px;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--color-gray-200);
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Markdown Content Styling */
+        #content {
+            max-width: 100%;
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--color-gray-800);
+        }
+
+        /* Headers */
+        h1 {
+            color: var(--color-gray-900);
+            border-bottom: 3px solid #d32f2f;
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        h2 {
+            color: var(--color-gray-800);
+            border-bottom: 2px solid var(--color-gray-200);
+            padding-bottom: 8px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.375rem;
+            font-weight: 600;
+        }
+
+        h3 {
+            color: var(--color-gray-700);
+            margin-top: 30px;
+            margin-bottom: 16px;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        /* Tables - Modern styling with download button wrapper */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 24px 0;
+            position: relative;
+            padding-top: 35px;
+            border-radius: 8px;
+        }
+
+        .table-download-btn {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 10;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(40, 167, 69, 0.3);
+        }
+
+        .table-download-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(40, 167, 69, 0.4);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+            font-size: 14px;
+            background: var(--color-white);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid var(--color-gray-200);
+            padding: 14px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--color-gray-50);
+            font-weight: 600;
+            color: var(--color-gray-800);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--color-gray-50);
+        }
+
+        tr:hover {
+            background-color: var(--color-red-light);
+        }
+
+        /* Code and inline elements */
+        code {
+            background: var(--color-gray-100);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', 'SF Mono', monospace;
+            font-size: 0.875em;
+            color: var(--color-gray-800);
+        }
+
+        /* Blockquotes */
+        blockquote {
+            border-left: 4px solid #d32f2f;
+            margin: 24px 0;
+            padding: 16px 24px;
+            background: var(--color-red-light);
+            font-style: italic;
+            border-radius: 0 6px 6px 0;
+        }
+
+        /* Strong text */
+        strong {
+            color: var(--color-gray-900);
+            font-weight: 600;
+        }
+
+        /* Links */
+        a {
+            color: #d32f2f;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--color-red-dark);
+            text-decoration: underline;
+        }
+
+        /* Horizontal rule */
+        hr {
+            border: none;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #d32f2f, transparent);
+            margin: 40px 0;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+
+        li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        /* Paragraphs */
+        p {
+            margin: 16px 0;
+            line-height: 1.7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .markdown-container {
+                margin: 10px;
+                padding: 20px;
+                border-radius: 8px;
+            }
+            
+            .download-section {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .word-download-btn {
+                padding: 10px 16px;
+                font-size: 13px;
+                margin: 5px;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.25rem;
+            }
+            
+            h3 {
+                font-size: 1.125rem;
+            }
+
+            .table-download-btn {
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+        }
+
+        /* Loading state */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--color-gray-500);
+        }
+
+        .loading::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--color-gray-300);
+            border-top: 2px solid #d32f2f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- GeneSeq Vista Header Section -->
+    <div class="geneseq-header">
+        <div class="geneseq-container">
+            <div class="header">
+                타사 제품 조사
+            </div>
+            
+            <div class="subtitle">
+                에이전트 설명 영역입니다.
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Section -->
+    <div class="download-section">
+        <button class="word-download-btn" onclick="downloadAsWord()">📄 워드 문서 다운로드</button>
+        <button class="word-download-btn" onclick="downloadAsHtml()" style="background: #6c757d;">🌐 HTML 파일 다운로드</button>
+    </div>
+
+    <!-- Main Container for Markdown Content -->
+    <div class="main-container">
+        <div class="markdown-container">
+            <div id="content"></div>
+        </div>
+    </div>
+
+    <script>
+        // 현재 로드된 파일명을 저장할 변수
+        let currentFileName = '피부사상균_진단_키트_시장_분석_보고서';
+        
+        // 브라우저 환경 체크
+        let fileSystemSupported = false;
+        
+        // 페이지 로드 시 초기화
+        window.onload = function() {
+            checkFileSystemSupport();
+            renderMarkdown(data.markdownContent);
+        };
+        
+        // File System Access API 지원 여부 확인
+        function checkFileSystemSupport() {
+            // 여러 조건 체크
+            const hasAPI = 'showSaveFilePicker' in window;
+            const isSecureContext = window.isSecureContext;
+            const notInFrame = (() => {
+                try {
+                    return window.self === window.top;
+                } catch {
+                    return false;
+                }
+            })();
+            
+            fileSystemSupported = hasAPI && isSecureContext && notInFrame;
+            
+            // // 상태 표시 업데이트
+            // const infoDiv = document.getElementById('downloadInfo');
+            // if (fileSystemSupported) {
+            //     infoDiv.innerHTML = '✅ 파일 저장 대화상자 지원 (Chrome/Edge)';
+            //     infoDiv.style.background = '#e8f5e8';
+            //     infoDiv.style.color = '#2e7d32';
+            // } else {
+            //     let reason = '';
+            //     if (!hasAPI) reason = ' (File System Access API 미지원)';
+            //     else if (!isSecureContext) reason = ' (HTTPS 필요)';
+            //     else if (!notInFrame) reason = ' (iframe에서 실행)';
+                
+            //     infoDiv.innerHTML = `⚠️ 기본 다운로드 방식 사용${reason}`;
+            //     infoDiv.style.background = '#fff3cd';
+            //     infoDiv.style.color = '#856404';
+            // }
+            
+            console.log('File System API Support:', {
+                hasAPI,
+                isSecureContext,
+                notInFrame,
+                supported: fileSystemSupported
+            });
+        }
+
+        // 병원체별 데이터
+        const data = {
+                markdownContent: `
+# 요약
+- 이번 조사에서는 **총 8개 제조사가 포함된 8개 제품**을 분석하였으며, **총 5종의 주요 피부사상균 병원체가** 검출되었습니다.  
+- 이들 병원체는 각기 **특정 타겟 진단 유전자를 활용하여, 동일 속 내에서도 개별 단독 채널로 구별**하여 검출하고 있었습니다.  
+- 대다수 제품에서는 **인간 유전자를 대상으로 하는 internal control을 적용**하였으며, 주요 **대상 검체로는 피부 스크래핑, 손발톱, 모발이 포함**되었습니다.  
+- **인허가 현황은 대부분 CE-IVD 인증을 획득하였고, 일부 제품은 FDA 510(k) 또는 국가별 허가를 보유하고 있습니다.**  
+
+
+# 요약 통계
+### ◈분석 대상
+|               제조사                | 제품수 |
+| :------------------------------: | :-: |
+|            Biotype AG            |  1  |
+| Fast Track Diagnostics (Siemens) |  1  |
+|           EUROIMMUN AG           |  1  |
+|            ingenetix             |  1  |
+|         SSI Diagnostica          |  1  |
+|           PathoNostics           |  1  |
+|           Seegene USA            |  1  |
+|              Biovet              |  1  |
+
+제품수 상위 순으로 기본 정렬. 지품수가 동일할 경우 A,B,C 순으로 정렬
+
+
+### ◈병원체 빈도
+|             병원체             | 제품수 |
+| :-------------------------: | :-: |
+|     Trichophyton rubrum     |  8  |
+|  Epidermophyton floccosum   |  7  |
+|      Microsporum canis      |  7  |
+| Trichophyton mentagrophytes |  6  |
+| Trichophyton interdigitale  |  5  |
+|      Nannizzia gypsea       |  4  |
+|      Candida albicans       |  1  |
+|        Candida spp.         |  1  |
+
+
+### ◈병원체 별 타겟진 빈도
+| 병원체                         | 타겟 유전자        | 제품수 |
+| --------------------------- | ------------- | --- |
+| Trichophyton rubrum         | ITS+28S rRNA  | 3   |
+| Trichophyton rubrum         | ITS1+28S rRNA | 3   |
+| Trichophyton rubrum         | ITS1          | 2   |
+| Epidermophyton floccosum    | ITS           | 4   |
+| Epidermophyton floccosum    | ITS+28S rRNA  | 3   |
+| Microsporum canis           | ITS           | 4   |
+| Microsporum canis           | ITS1+28S Rrna | 3   |
+| Trichophyton mentagrophytes | ITS           | 3   |
+| Trichophyton mentagrophytes | ITS1+28S rRNA | 3   |
+| Trichophyton interdigitale  | ITS           | 2   |
+| Trichophyton interdigitale  | ITS1          | 3   |
+| Nannizzia gypsea            | ITS           | 2   |
+| Nannizzia gypsea            | ITS+28S rRNA  | 2   |
+| Candida albicans            | ITS           | 1   |
+| Candida spp.                | 18S rRNA      | 1   |
+
+
+### ◈Internal control
+| Internal Control             | 제품수 |
+| ---------------------------- | --- |
+| Human/RNase P                | 3   |
+| Human/RNase P or beta-globin | 3   |
+| 정보 없음                        | 2   |
+
+
+### ◈인/허가
+| 인허가 종류  | 제품수 |
+| ------- | --- |
+| CE-IVD  | 9   |
+| FDA EUA | 1   |
+| RUO     | 1   |
+
+
+# 상세정보
+
+## 피부사상균 진단 키트 비교표
+
+|제조사|제품명|병원체|Internal Control (Host/Gene)|검체|추출 방식|TAT|인허가|민감도|특이도|적용 기술|Reference|
+|---|---|---|---|---|---|---|---|---|---|---|---|
+|Biotype AG|Mentype® MycoDerm / MycoDermQS|Trichophyton rubrum, T. mentagrophytes, Microsporum canis, Epidermophyton floccosum 등|정보 없음|피부, 손발톱, 머리카락 등|정보 없음|정보 없음|CE-IVD|정보 없음|정보 없음|Multiplex PCR, lateral flow|[1], [2]|
+|Fast Track Diagnostics (Siemens)|FTD Dermatophytes|Trichophyton rubrum, T. interdigitale/mentagrophytes, Microsporum canis, Epidermophyton floccosum, Nannizzia gypsea|human/RNase P|피부, 손발톱, 머리카락 등|FTD Kit|~1hr|CE-IVD, RUO|≥90%|≥90%|Multiplex Real-time PCR|[3], [4], [5]|
+|EUROIMMUN AG|EuroArray Dermatomycosis (EuroDerm Assay)|Trichophyton rubrum, Trichopyhton interdigitale, Microsporum canis, Epidermophyton floccosum, Nannizzia gypsea, Candida spp.|human/RNase P|피부, 손발톱, 머리카락 등|SwiftX-traction Kit|<20min|CE-IVD|≥95%|≥95%|Multiplex PCR, microarray|[6], [7]|
+|ingenetix|MycoReal® Kit Fungi|Trichophyton rubrum, T. mentagrophytes/interdigitale, Microsporum canis, Epidermophyton floccosum|human/RNase P or beta-globin|피부, 손발톱, 머리카락 등|정보 없음|~1hr|CE-IVD|≥90%|≥90%|Real-time PCR|[8], [9]|
+|SSI Diagnostica|Dermatophyte and C. albicans RT-PCR Kit|Trichophyton rubrum, T. mentagrophytes/interdigitale, Microsporum canis, Epidermophyton floccosum, Candida albicans|human/RNase P|피부, 손발톱, 머리카락 등|정보 없음|~1hr|CE-IVD|≥90%|≥90%|Real-time PCR|[10]|
+|PathoNostics|DermaGenius® 3.0 (Nail Multiplex)|Trichophyton rubrum, T. interdigitale/mentagrophytes, Microsporum canis, Epidermophyton floccosum, Nannizzia gypsea|human/RNase P or beta-globin|손톱, 피부 등|PathoNostics Extraction Kit|10~20min|CE-IVD|≥95%|≥95%|Multiplex PCR|[11], [12], [13]|
+|Seegene USA|Novaplex™ Dermatophyte|Trichophyton rubrum, T. mentagrophytes/interdigitale, Microsporum canis, Epidermophyton floccosum, Nannizzia gypsea|human/RNase P or beta-globin|피부, 손발톱, 머리카락 등|Universal Cartridge Kit|~1hr|FDA EUA, CE-IVD|≥95%|≥95%|Multiplex Real-time PCR|[14], [15], [16]|
+|Biovet|Dermatophytes multiplex qPCR kit|정보 없음|정보 없음|피부, 손발톱, 머리카락 등|정보 없음|정보 없음|CE-IVD|정보 없음|정보 없음|Multiplex qPCR|[17], [18]|
+
+
+## 제조사별 병원체 타겟 유전자 비교표
+
+|병원체|Biotype AG<br>Mentype® MycoDerm /<br>MycoDermQS|Fast Track Diagnostics<br>(Siemens)<br>FTD Dermatophytes|EUROIMMUN AG<br>EuroArray Dermatomycosis<br>(EuroDerm Assay)|ingenetix<br>MycoReal® Kit Fungi|SSI Diagnostica<br>Dermatophyte and<br>C. albicans RT-PCR Kit|PathoNostics<br>DermaGenius® 3.0<br>(Nail Multiplex)|Seegene USA<br>Novaplex™<br>Dermatophyte|Biovet<br>Dermatophytes<br>multiplex qPCR kit|
+|---|---|---|---|---|---|---|---|---|
+|**Trichophyton rubrum**|28S rRNA gene, ITS1|ITS1, 28S rRNA|28S rRNA, ITS|28S rRNA, ITS|ITS1|ITS1|ITS1, 28S rRNA|ITS, 28S rRNA|
+|**Microsporum canis**|ITS1, 28S rRNA|ITS1, 28S rRNA|28S rRNA, ITS|ITS1, 28S rRNA|ITS1|ITS1|ITS1, 28S rRNA|ITS, 28S rRNA|
+|**Epidermophyton floccosum**|ITS1, 28S rRNA|ITS1, 28S rRNA|28S rRNA, ITS|ITS1, 28S rRNA|ITS1|ITS1|ITS1, 28S rRNA|ITS, 28S rRNA|
+|**Trichophyton mentagrophytes**|28S rRNA, ITS1|ITS1, 28S rRNA|28S rRNA, ITS|28S rRNA, ITS1|ITS1|ITS1|ITS1, 28S rRNA|ITS, 28S rRNA|
+|**Trichophyton interdigitale**|28S rRNA, ITS1|ITS1, 28S rRNA|28S rRNA, ITS|28S rRNA, ITS1|ITS1|ITS1|ITS1, 28S rRNA|ITS, 28S rRNA|
+|**Nannizzia gypsea**|정보 없음|ITS1, 28S rRNA|ITS|ITS1|ITS1|ITS1|ITS1, 28S rRNA|ITS, 28S rRNA|
+|**Candida spp.**|정보 없음|정보 없음|정보 없음|18S rRNA|18S rRNA|18S rRNA|18S rRNA|정보 없음|
+|**Candida albicans**|정보 없음|정보 없음|정보 없음|18S rRNA|18S rRNA|18S rRNA|18S rRNA|정보 없음|
+
+
+## 데이터 소스 및 수집 정보
+
+|No.|데이터 소스|제조사|제품명|데이터 URL|수집 방식|
+|---|---|---|---|---|---|
+|1|매뉴얼 (PDF)|Biotype AG|Mentype® MycoDerm / MycoDermQS|https://www.dlongwood.com/wp-content/uploads/2019/11/Biotype-MycoDerm_LATFlow_EN.pdf|자동|
+|2|매뉴얼 (PDF)|Biotype AG|Mentype® MycoDerm / MycoDermQS|https://www.yumpu.com/en/document/view/6797771/mentyper-mycodermqs-handbook-biotype|자동|
+|3|매뉴얼 (PDF)|Fast Track Diagnostics|FTD Dermatophytes|https://msa.sm.ee/ctrl/et/Fail/laadi_alla/54403|자동|
+|4|웹|Fast Track Diagnostics|FTD Dermatophytes|https://www.siemens-healthineers.com/molecular-diagnostics/ftd-infectious-disease-ruo-assays|자동|
+|5|웹|Fast Track Diagnostics|FTD Dermatophytes|https://www.avantorsciences.com/us/en/product/31984727/fast-track-diagnostics-real-time-pcr-multiplexing-kits|자동|
+|6|매뉴얼 (PDF)|EUROIMMUN AG|EuroArray Dermatomycosis|https://www.xpedite-dx.com/fileadmin/benutzerdaten/xpedite-dx-com/pdf/SXEA/EUROArray_SwiftX-traction_-_CE-IVD_-_IFU.pdf|자동|
+|7|웹|EUROIMMUN AG|EuroArray Dermatomycosis|https://www.dermatophyte-pcr.com/physicians-laboratories/euroarray-method.html|자동|
+|8|브로셔 (PDF)|ingenetix|MycoReal® Kit Fungi|https://www.adgenix.fr/pdf/DHUF004XX.PD.FLY.R.K.X.KFUN-EN.V1.0.pdf|자동|
+|9|웹|ingenetix|MycoReal® Kit Fungi|https://ingenetix.com/en/product/human/Kit%2BFungi/|자동|
+|10|매뉴얼 (PDF)|SSI Diagnostica|Dermatophyte and C. albicans RT-PCR Kit|https://ssidiagnostica.com/wp-content/uploads/2023/12/IFU-PCR-kit-10538-2.pdf|자동|
+|11|웹|PathoNostics|DermaGenius® 3.0 (Nail Multiplex)|https://www.pathonostics.com/product/dermagenius|자동|
+|12|브로셔 (PDF)|PathoNostics|DermaGenius® 3.0 (Nail Multiplex)|https://www.tecomedical.com/download-file?file_code=bb743d04ab&file_id=4829|자동|
+|13|브로셔 (PDF)|PathoNostics|DermaGenius® 3.0 (Nail Multiplex)|https://www.clonit.it/repofiles/17-DermaGenius%20Brochure|자동|
+|14|웹|Seegene USA|Novaplex™ Dermatophyte|https://seegeneus.com/product/novaplex-dermatophyte/|자동|
+|15|브로셔 (PDF)|Seegene USA|Novaplex™ Dermatophyte|https://www.buhlmannlabs.ch/wp-content/uploads/2022/01/Brochure-of-Dermatophyte.pdf|수동|
+|16|웹|Seegene USA|Novaplex™ Dermatophyte|https://www.seegene.com/advantages/wide_range_of_products|수동|
+|17|웹|Biovet|Dermatophytes multiplex qPCR kit|https://www.biopremier.com/en/real-time-pcr-detection-test-kit-dermatophytes-multiplex-microsporum-canistrichophyton-sppandnannizzia-gypsea|자동|
+|18|웹|Biovet|Dermatophytes multiplex qPCR kit|https://en.biovet-inc.com/diagnostic-kits/|자동|
+
+`
+        };
+
+        // 마크다운 렌더링 함수
+        function renderMarkdown(markdown) {
+            const html = marked.parse(markdown);
+            document.getElementById('content').innerHTML = html;
+            
+            // 테이블을 래퍼로 감싸고 다운로드 버튼 추가
+            const tables = document.querySelectorAll('table');
+            tables.forEach((table, index) => {
+                if (!table.parentElement.classList.contains('table-wrapper')) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'table-wrapper';
+                    table.parentNode.insertBefore(wrapper, table);
+                    wrapper.appendChild(table);
+                    
+                    // 다운로드 버튼 추가
+                    const downloadBtn = document.createElement('button');
+                    downloadBtn.className = 'table-download-btn';
+                    downloadBtn.textContent = '📥 엑셀 다운로드';
+                    downloadBtn.onclick = () => downloadTableAsExcel(table, index);
+                    wrapper.appendChild(downloadBtn);
+                }
+            });
+        }
+        
+        // 안전한 파일 저장 함수
+        async function saveFileWithDialog(blob, defaultName, fileTypes) {
+            if (!fileSystemSupported) {
+                // 폴백: 기본 다운로드 방식
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = defaultName;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // 약간의 지연 후 URL 해제
+                setTimeout(() => {
+                    URL.revokeObjectURL(link.href);
+                }, 1000);
+                
+                alert('파일이 다운로드되었습니다. 브라우저의 다운로드 폴더를 확인해주세요.');
+                return true;
+            }
+            
+            // File System Access API 사용
+            try {
+                console.log('File System API 사용 시도:', { defaultName, fileTypes });
+                
+                const fileHandle = await window.showSaveFilePicker({
+                    suggestedName: defaultName,
+                    types: fileTypes,
+                    excludeAcceptAllOption: false
+                });
+                
+                console.log('파일 핸들 획득 성공:', fileHandle);
+                
+                const writable = await fileHandle.createWritable();
+                await writable.write(blob);
+                await writable.close();
+                
+                alert('파일이 성공적으로 저장되었습니다!');
+                return true;
+                
+            } catch (err) {
+                console.error('File System API 오류:', err);
+                
+                if (err.name === 'AbortError') {
+                    console.log('사용자가 저장을 취소했습니다.');
+                    return false;
+                }
+                
+                // API 실패 시 폴백
+                console.warn('File System API 실패, 기본 다운로드로 전환');
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = defaultName;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                setTimeout(() => {
+                    URL.revokeObjectURL(link.href);
+                }, 1000);
+                
+                alert('파일이 다운로드되었습니다. 브라우저의 다운로드 폴더를 확인해주세요.');
+                return true;
+            }
+        }
+        
+        // 워드 다운로드 함수
+        async function downloadAsWord() {
+            try {
+                const content = document.getElementById('content');
+                if (!content || !content.innerHTML.trim()) {
+                    alert('다운로드할 콘텐츠가 없습니다.');
+                    return;
+                }
+                
+                const defaultName = `${currentFileName}.doc`;
+                
+                const wordHtml = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+                      xmlns:w="urn:schemas-microsoft-com:office:word" 
+                      xmlns="http://www.w3.org/TR/REC-html40">
+                <head>
+                    <meta charset="utf-8">
+                    <meta name=ProgId content=Word.Document>
+                    <meta name=Generator content="Microsoft Word 15">
+                    <meta name=Originator content="Microsoft Word 15">
+                    <style>
+                        @page Section1 { size:A4 landscape; margin:1.5cm 1cm 1.5cm 1cm; }
+                        div.Section1 { page:Section1; }
+                        body { font-family: "맑은 고딕", "Malgun Gothic", Arial, sans-serif; font-size: 9pt; line-height: 1.3; }
+                        h1 { font-size: 14pt; font-weight: bold; color: #2c3e50; border-bottom: 2pt solid #d32f2f; padding-bottom: 4pt; }
+                        h2 { font-size: 12pt; font-weight: bold; color: #34495e; border-bottom: 1pt solid #ecf0f1; padding-bottom: 3pt; margin-top: 12pt; }
+                        h3 { font-size: 10pt; font-weight: bold; color: #7f8c8d; margin-top: 10pt; }
+                        table { width: 100%; border-collapse: collapse; margin: 6pt 0; font-size: 7pt; table-layout: fixed; }
+                        th, td { border: 0.5pt solid #ddd; padding: 2pt; text-align: left; word-wrap: break-word; vertical-align: top; overflow: hidden; }
+                        th { background-color: #f8f9fa; font-weight: bold; }
+                        tr { page-break-inside: avoid; }
+                        strong { font-weight: bold; color: #2c3e50; }
+                        blockquote { border-left: 2pt solid #d32f2f; margin: 6pt 0; padding: 3pt 6pt; background: #f8f9fa; font-style: italic; }
+                        .table-wrapper { padding-top: 0; }
+                        .table-download-btn { display: none; }
+                        p { margin: 3pt 0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="Section1">
+                        ${content.innerHTML.replace(/<button[^>]*>.*?<\/button>/gi, '')}
+                    </div>
+                </body>
+                </html>`;
+                
+                const blob = new Blob(['\ufeff', wordHtml], { 
+                    type: 'application/msword; charset=utf-8' 
+                });
+                
+                await saveFileWithDialog(blob, defaultName, [{
+                    description: 'Word 문서',
+                    accept: { 'application/msword': ['.doc'] }
+                }]);
+                
+            } catch (error) {
+                console.error('워드 다운로드 오류:', error);
+                alert('워드 다운로드 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+        
+        // HTML 다운로드 함수
+        async function downloadAsHtml() {
+            try {
+                const defaultName = `${currentFileName}.html`;
+                
+                const content = document.getElementById('content');
+                const htmlContent = `
+                <!DOCTYPE html>
+                <html lang="ko">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${currentFileName}</title>
+                    <style>
+                        body { font-family: "Malgun Gothic", Arial, sans-serif; line-height: 1.6; margin: 40px; }
+                        h1 { color: #2c3e50; border-bottom: 3px solid #d32f2f; padding-bottom: 10px; }
+                        h2 { color: #34495e; border-bottom: 2px solid #ecf0f1; padding-bottom: 8px; margin-top: 40px; }
+                        h3 { color: #7f8c8d; margin-top: 30px; }
+                        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 12px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f8f9fa; font-weight: 600; }
+                        strong { color: #2c3e50; }
+                        blockquote { border-left: 4px solid #d32f2f; margin: 20px 0; padding: 10px 20px; background: #f8f9fa; font-style: italic; }
+                        .table-download-btn { display: none; }
+                    </style>
+                </head>
+                <body>
+                    <h1>${currentFileName}</h1>
+                    ${content.innerHTML.replace(/<button[^>]*>.*?<\/button>/gi, '')}
+                </body>
+                </html>`;
+                
+                const blob = new Blob([htmlContent], { type: 'text/html; charset=utf-8' });
+                
+                await saveFileWithDialog(blob, defaultName, [{
+                    description: 'HTML 파일',
+                    accept: { 'text/html': ['.html'] }
+                }]);
+                
+            } catch (error) {
+                console.error('HTML 다운로드 오류:', error);
+                alert('HTML 다운로드 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+        
+        // 엑셀 다운로드 함수
+        async function downloadTableAsExcel(table, index) {
+            try {
+                let defaultName = `table_${index + 1}.xlsx`;
+                const prevElement = table.closest('.table-wrapper').previousElementSibling;
+                if (prevElement && (prevElement.tagName === 'H2' || prevElement.tagName === 'H3')) {
+                    const title = prevElement.textContent.replace(/[^\w\s가-힣]/gi, '').trim();
+                    if (title) {
+                        defaultName = `${title}.xlsx`;
+                    }
+                }
+                
+                const wb = XLSX.utils.table_to_book(table, {sheet: "Sheet1"});
+                
+                if (fileSystemSupported) {
+                    try {
+                        const fileHandle = await window.showSaveFilePicker({
+                            suggestedName: defaultName,
+                            types: [{
+                                description: 'Excel 파일',
+                                accept: {
+                                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+                                }
+                            }],
+                            excludeAcceptAllOption: false
+                        });
+                        
+                        const writable = await fileHandle.createWritable();
+                        const buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                        await writable.write(buffer);
+                        await writable.close();
+                        
+                        alert('파일이 성공적으로 저장되었습니다!');
+                        return;
+                        
+                    } catch (err) {
+                        if (err.name === 'AbortError') {
+                            return;
+                        }
+                        console.warn('File System API 실패, 기본 다운로드로 전환:', err);
+                    }
+                }
+                
+                // 폴백: 기본 다운로드 방식
+                XLSX.writeFile(wb, defaultName);
+                alert('파일이 다운로드되었습니다. 브라우저의 다운로드 폴더를 확인해주세요.');
+                
+            } catch (error) {
+                console.error('엑셀 다운로드 오류:', error);
+                alert('엑셀 다운로드 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
