@@ -1424,19 +1424,6 @@
 
   const mediaQuery = window.matchMedia('(max-width: 768px)');
 
-  function handleMediaQuery(e) {
-    if (e.matches) {
-      // 768px 이하일 때 실행할 코드
-      console.log('모바일 화면');
-      if(!isCollapsed){
-        isCollapsed = !isCollapsed;
-        sidebar.classList.toggle('collapsed', isCollapsed);
-      }
-    } else {
-      // 768px 초과일 때 실행할 코드
-      console.log('데스크톱 화면');
-    }
-  }
 
   // 초기 실행
   handleMediaQuery(mediaQuery);
@@ -1460,6 +1447,21 @@
     isCollapsed = !isCollapsed;
     sidebar.classList.toggle('collapsed', isCollapsed);
   });
+
+  function handleMediaQuery(e) {
+    if (e.matches) {
+      // 768px 이하일 때 실행할 코드
+      console.log('모바일 화면');
+      if(!isCollapsed){
+        isCollapsed = !isCollapsed;
+        sidebar.classList.toggle('collapsed', isCollapsed);
+      }
+    } else {
+      // 768px 초과일 때 실행할 코드
+      console.log('데스크톱 화면');
+    }
+  }
+
 
   // Quill 에디터 초기화
   const quill = new Quill('#editor', {
