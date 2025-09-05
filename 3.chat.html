@@ -1422,14 +1422,7 @@
 
 <script>
 
-  const mediaQuery = window.matchMedia('(max-width: 768px)');
 
-
-  // 초기 실행
-  handleMediaQuery(mediaQuery);
-
-  // 변화 감지
-  mediaQuery.addEventListener('change', handleMediaQuery);
 
 
   // 전역 변수
@@ -1441,7 +1434,7 @@
   // 사이드바 토글
   const sidebar = document.getElementById('sidebar');
   const sidebarToggle = document.getElementById('sidebarToggle');
-  let isCollapsed = false;
+  var isCollapsed = false;
 
   sidebarToggle.addEventListener('click', function() {
     isCollapsed = !isCollapsed;
@@ -1452,7 +1445,7 @@
     if (e.matches) {
       // 768px 이하일 때 실행할 코드
       console.log('모바일 화면');
-      if(!isCollapsed){
+      if(typeof isCollapsed === 'undefined' || !isCollapsed){
         isCollapsed = !isCollapsed;
         sidebar.classList.toggle('collapsed', isCollapsed);
       }
@@ -1461,6 +1454,16 @@
       console.log('데스크톱 화면');
     }
   }
+
+  
+  const mediaQuery = window.matchMedia('(max-width: 768px)');
+
+
+  // 초기 실행
+  handleMediaQuery(mediaQuery);
+
+    // 변화 감지
+  mediaQuery.addEventListener('change', handleMediaQuery);
 
 
   // Quill 에디터 초기화
