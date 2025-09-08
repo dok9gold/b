@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상세 보고서</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <style>
+        /* CSS Variables - Using updated_chat_layout888 style */
+        :root {
+            --color-white: #FFFFFF;
+            --color-black: #000000;
+            --color-red: #DC2626;
+            --color-gray-50: #F9FAFB;
+            --color-gray-100: #F3F4F6;
+            --color-gray-200: #E5E7EB;
+            --color-gray-300: #D1D5DB;
+            --color-gray-400: #9CA3AF;
+            --color-gray-500: #6B7280;
+            --color-gray-600: #4B5563;
+            --color-gray-700: #374151;
+            --color-gray-800: #1F2937;
+            --color-gray-900: #111827;
+            --color-red-light: #FEF2F2;
+            --color-red-dark: #991B1B;
+        }
+
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--color-gray-50);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* GeneSeq Vista Header - 기존 스타일 유지하되 현대적으로 개선 */
+        .geneseq-header {
+            background: var(--color-white);
+            border-bottom: 1px solid var(--color-gray-200);
+            /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
+        }
+
+        .geneseq-container {
+            background-color: white;
+            border: 2px solid var(--color-gray-200);
+        }
+
+        .header {
+            background-color: #d32f2f;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            background-color: var(--color-gray-100);
+            padding: 10px 20px;
+            font-size: 13px;
+            color: var(--color-gray-600);
+            border-bottom: 1px solid var(--color-gray-200);
+        }
+        .red-text {
+            color: #d32f2f;
+            font-weight: 500;
+        }
+
+        /* Main Content Area - Full page scroll */
+        .main-container {
+            width: 100%;
+        }
+
+        /* Markdown Container - Modern styling */
+        .markdown-container {
+            background: var(--color-white);
+            margin: 20px;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--color-gray-200);
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Markdown Content Styling - updated_chat_layout888 스타일 */
+        #content {
+            max-width: 100%;
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--color-gray-800);
+        }
+
+        /* Headers */
+        h1 {
+            color: var(--color-gray-900);
+            border-bottom: 3px solid #d32f2f;
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        h2 {
+            color: var(--color-gray-800);
+            border-bottom: 2px solid var(--color-gray-200);
+            padding-bottom: 8px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.375rem;
+            font-weight: 600;
+        }
+
+        h3 {
+            color: var(--color-gray-700);
+            margin-top: 30px;
+            margin-bottom: 16px;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        /* Tables - Modern styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            font-size: 14px;
+            background: var(--color-white);
+            border-radius: 8px;
+            overflow: hidden;
+            /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
+        }
+
+        th, td {
+            border: 1px solid var(--color-gray-200);
+            padding: 14px 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--color-gray-50);
+            font-weight: 600;
+            color: var(--color-gray-800);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--color-gray-50);
+        }
+
+        tr:hover {
+            background-color: var(--color-red-light);
+        }
+
+        /* Code and inline elements */
+        code {
+            background: var(--color-gray-100);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', 'SF Mono', monospace;
+            font-size: 0.875em;
+            color: var(--color-gray-800);
+        }
+
+        /* Blockquotes */
+        blockquote {
+            border-left: 4px solid #d32f2f;
+            margin: 24px 0;
+            padding: 16px 24px;
+            background: var(--color-red-light);
+            font-style: italic;
+            border-radius: 0 6px 6px 0;
+        }
+
+        /* Strong text */
+        strong {
+            color: var(--color-gray-900);
+            font-weight: 600;
+        }
+
+        /* Links */
+        a {
+            color: #d32f2f;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--color-red-dark);
+            text-decoration: underline;
+        }
+
+        /* Horizontal rule */
+        hr {
+            border: none;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #d32f2f, transparent);
+            margin: 40px 0;
+        }
+
+        /* Table wrapper for responsive */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 24px 0;
+            border-radius: 8px;
+            /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+
+        li {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        /* Paragraphs */
+        p {
+            margin: 16px 0;
+            line-height: 1.7;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .markdown-container {
+                margin: 10px;
+                padding: 20px;
+                border-radius: 8px;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 1.25rem;
+            }
+            
+            h3 {
+                font-size: 1.125rem;
+            }
+        }
+
+        /* Loading state */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--color-gray-500);
+        }
+
+        .loading::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--color-gray-300);
+            border-top: 2px solid #d32f2f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- GeneSeq Vista Header Section -->
+    <div class="geneseq-header">
+        <div class="geneseq-container">
+            <div class="header">
+                Causative Pathogen
+            </div>
+            
+            <div class="subtitle">
+                에이전트 설명 영역 입니다.
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container for Markdown Content -->
+    <div class="main-container">
+        <div class="markdown-container">
+            <div id="content"></div>
+        </div>
+    </div>
+
+    <script>
+        // 병원체별 데이터
+        const data = {
+                markdownContent: `
+### pathogen_microscope_image 
+
+![alt text](https://phil.cdc.gov//PHIL_Images/13219/13219_lores.jpg)
+
+[https://phil.cdc.gov/Details.aspx?pid=13219](https://phil.cdc.gov/Details.aspx?pid=13219)
+
+### pathogen_taxonomy_lineage
+|Taxonomy Level |Classification|
+|:-:|:-:|
+| acellular root | Viruses |
+| realm | Riboviria |
+| kingdom | Orthornavirae |
+| phylum | Negarnaviricota |
+| subphylum | Haploviricotina |
+| class | Monjiviricetes |
+| order | Mononegavirales |
+| family | Paramyxoviridae |
+| subfamily | Orthoparamyxovirinae |
+| genus | Henipavirus |
+
+### Pathogen Basic Information
+|Item |Description |Reference|
+|:-:|:-:|:-:|
+| 질병명 | Henipavirus encephalitis | [1] |
+| 병원체명 | Henipavirus nipahense | [2] |
+| Taxonomy ID | 3052225 | [2] |
+| 병원체 type | Virus | [2] |
+| Taxonomy rank | species | [2] |
+| Taxonomy synonym | "Nipah henipavirus", "Nipah virus", "Nipah-virus" | [9], [10] |
+| 형태학 생물학 정보 (GPT-5 model 예시) | 나파바이러스는 Paramyxoviridae 계 Henipavirus 속에 속하며, 과일박쥐(Pteropus spp.)가 주요 자연 숙주이다. 바이러스 입자는 "pleomorphic(다형성)"으로 구형 또는 털이멘트를 볼이며 크기는 약 40-1900nm이다. 유전체는 약 18.2kb 길이의 단일가닥 RNA로 구성되며(N, P, M, F, G, L)라고 불리는 단백질들로 둘러싸여 있다. | [3], [4], [5], [6] |
+| 역학 양상학적 정보 (GPT-5 model 예시) | 나파바이러스는 주로 동남아시아에서 발생하며, 주로 잠복기는 발병군으로 4-14일이다. 드물게 수개월에서 수년까지 지속할 수 있다. 임상 증상은 발병을 동반기 중독 이후서, 중증 호흡기 증상, 중추신경 증상은 이와함께 나타난다. 치명률은 "40-75%"로 매우 높으며, 현재 유행이어지는 현재 말레이시아 인도 Kerala 지역에서 정원일 철번이나 | [7] |
+| 최신 가지 및 검 정보 (GPT-5 model 예시) | 2025년 7월 인도 Kerala에서 18세 여성 사망과 추가 감염 사례가 보고되어 WHO가 질병청 감역청을 경고했다. WHO는 바이러스에서 나는하단 갈의진근 "위험한 감계 모약"어 경력 잣천 식다긴 4-5월을 위험 운익으르 지적했다. 이번 생본서에서는 20% 이상이 사전득이 속종악 속죽등(뱍긴 인거 전재 등)를 절도다. Kerala 지역에서는 박진이나 인간 사이의 분박힌 전파 경로가 이적 폭단되어 있어도다. 확측 측도 따라에서는 바이러스노의 팬덕는 증성 성작 치해했다. 최근 보고된 전단금여에서 5월 감염, 2월 사망의 병정희 지헌시할 툴신 유작이 재기되었다. | [8] |
+| 표준 균주 판매처 |  "No data" |  |
+| 병원체 동의어 | MeSH synonym: "Nipah Viruses", "Virus, Nipah", "Nipah henipaviruses", "Nipah henipaviruses" | [9], [10] |
+| 병원체 종사인 | NIV |  |
+| 질병 종어이 및 우 시인 | Nipah virus infection |  |
+| pathogen_genome_count | 14 |  |
+| 숙주 | human |  |
+
+
+### Reference
+
+|Reference|데이터 URL|
+|:-:|:-:|
+| [1] | https://icd.who.int/browse/2025-01/mms/en#1020283662 |
+| [2] | https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=3052225 |
+| [3] | https://www.cdc.gov/nipah-virus/hcp/clinical-overview/index.html |
+| [4] | https://pmc.ncbi.nlm.nih.gov/articles/PMC6235768/ |
+| [5] | https://ncdc.mohfw.gov.in/wp-content/uploads/2024/04/CD-Alert-Nipah-Virus-Disease.pdf |
+| [6] | https://pmc.ncbi.nlm.nih.gov/articles/PMC11930718/ |
+| [7] | https://www.cdc.gov/nipah-virus/about/index.html |
+| [8] | https://www.thesun.co.uk/health/35274594/nipah-teen-becomes-virus-india-pandemic/ |
+`
+            }
+
+        // 페이지 로드 시 초기화
+        window.onload = function() {
+            renderMarkdown(data.markdownContent);
+        };
+
+        // 마크다운 렌더링 함수
+        function renderMarkdown(markdown) {
+            const html = marked.parse(markdown);
+            document.getElementById('content').innerHTML = html;
+            
+            // 테이블을 래퍼로 감싸기 (반응형 스크롤)
+            const tables = document.querySelectorAll('table');
+            tables.forEach(table => {
+                if (!table.parentElement.classList.contains('table-wrapper')) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'table-wrapper';
+                    table.parentNode.insertBefore(wrapper, table);
+                    wrapper.appendChild(table);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
